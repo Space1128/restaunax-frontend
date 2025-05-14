@@ -146,13 +146,6 @@ const Dashboard: React.FC = () => {
                                 }}
                             />
                             <TextField
-                                label="Customer Name"
-                                variant="outlined"
-                                size="small"
-                                value={filters.customerName || ''}
-                                onChange={handleFilterChange('customerName')}
-                            />
-                            <TextField
                                 select
                                 label="Status"
                                 variant="outlined"

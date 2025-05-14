@@ -32,8 +32,6 @@ export interface OrdersResponse {
 
 export interface OrderFilters {
     status?: OrderStatus;
-    customerName?: string;
-    orderType?: OrderType;
     search?: string;
     page: number;
     pageSize: number;
