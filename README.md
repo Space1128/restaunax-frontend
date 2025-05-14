@@ -2,6 +2,104 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Docker Development Setup
+
+### Prerequisites
+- Docker installed on your machine
+- Docker Compose (recommended for development)
+
+### Quick Start with Docker Compose (Recommended)
+
+We provide a `docker-compose.yml` for the easiest development experience:
+
+```bash
+# Start the development environment
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the development environment
+docker-compose down
+```
+
+The application will be available at `http://localhost:3000` with hot-reloading enabled.
+
+### Alternative: Docker Without Compose
+
+If you prefer not to use Docker Compose, you can still use Docker directly:
+
+```bash
+# Build the development Docker image
+docker build -t restaunax-frontend-dev -f Dockerfile.dev .
+
+# Run the container in development mode
+docker run -d \
+  -p 3000:3000 \
+  -v ${PWD}:/app \
+  -v /app/node_modules \
+  -e CHOKIDAR_USEPOLLING=true \
+  --name restaunax-dev \
+  restaunax-frontend-dev
+```
+
+### Development Features
+- Hot-reloading enabled: Changes to your code will automatically refresh the browser
+- Source code is mounted as a volume: Edit code on your host machine
+- Node modules are preserved in a Docker volume
+- Development server with all Create React App features
+- Interactive terminal support for debugging
+
+### Environment Variables
+You can add environment variables by:
+
+1. Creating a `.env` file in the project root:
+```env
+REACT_APP_API_URL=your_api_url
+```
+
+2. Or adding them to docker-compose.yml:
+```yaml
+environment:
+  - REACT_APP_API_URL=your_api_url
+```
+
+### Useful Docker Compose Commands
+
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild and start services
+docker-compose up -d --build
+
+# Run tests
+docker-compose exec frontend npm test
+
+# Access container shell
+docker-compose exec frontend sh
+```
+
+### Troubleshooting
+- If hot-reloading isn't working:
+  - Ensure `CHOKIDAR_USEPOLLING=true` is set
+  - Check if `WATCHPACK_POLLING=true` is set
+  - Verify that volumes are mounted correctly
+- If modules are missing:
+  ```bash
+  docker-compose down -v  # Remove volumes
+  docker-compose up -d --build  # Rebuild with fresh volumes
+  ```
+- For Windows users:
+  - Use PowerShell or Git Bash for proper path handling
+  - Ensure line endings are set to LF in git config
+
 ## Docker Setup
 
 ### Prerequisites
@@ -67,6 +165,103 @@ docker rm <container_id>
 # Remove image
 docker rmi restaunax-frontend
 ```
+
+## Docker Production Setup
+
+### Production Deployment
+
+We provide optimized Docker configurations for production deployment with nginx serving static files.
+
+### Quick Start with Docker Compose (Recommended)
+
+```bash
+# Build and start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Stop production services
+docker-compose -f docker-compose.prod.yml down
+```
+
+The production build will be available at `http://localhost:80`
+
+### Alternative: Docker Without Compose
+
+```bash
+# Build the production image
+docker build -t restaunax-frontend-prod .
+
+# Run the production container
+docker run -d \
+  -p 80:80 \
+  --name restaunax-prod \
+  restaunax-frontend-prod
+```
+
+### Production Features
+- Multi-stage build process for smaller final image
+- nginx server with optimized configuration
+- Static file caching and compression
+- Security headers enabled
+- Health checks for container monitoring
+- Resource limits and constraints
+- Automatic container restart on failure
+
+### Environment Variables
+For production deployment, set environment variables during build time:
+
+```bash
+# Using Docker Compose
+REACT_APP_API_URL=https://api.example.com docker-compose -f docker-compose.prod.yml up -d --build
+
+# Using Docker
+docker build \
+  --build-arg REACT_APP_API_URL=https://api.example.com \
+  -t restaunax-frontend-prod .
+```
+
+### Production Deployment Commands
+
+```bash
+# Build and start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Check container health
+docker-compose -f docker-compose.prod.yml ps
+
+# Scale service (if needed)
+docker-compose -f docker-compose.prod.yml up -d --scale frontend=2
+
+# Rolling update
+docker-compose -f docker-compose.prod.yml up -d --build --force-recreate
+```
+
+### Production Considerations
+- SSL/TLS certificates should be configured for production
+- Consider using a reverse proxy (e.g., Traefik, nginx-proxy) for multiple services
+- Implement proper logging and monitoring
+- Set up automated backups if needed
+- Configure appropriate resource limits based on usage
+
+### Troubleshooting Production
+- Check nginx logs:
+  ```bash
+  docker-compose -f docker-compose.prod.yml exec frontend nginx -T
+  docker-compose -f docker-compose.prod.yml exec frontend cat /var/log/nginx/error.log
+  ```
+- Verify nginx configuration:
+  ```bash
+  docker-compose -f docker-compose.prod.yml exec frontend nginx -t
+  ```
+- Monitor resource usage:
+  ```bash
+  docker stats restaunax-prod
+  ```
 
 ## Available Scripts
 
